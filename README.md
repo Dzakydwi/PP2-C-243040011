@@ -1,91 +1,103 @@
-# Tugas 1 - Dasar GUI Swing dan Layout
-**Mata Kuliah:** IF21W0508 – Praktikum Pemrograman II  
-**Nama Mahasiswa:** Dzaky  
-**NIM:** 243040011  
+Tugas 2 - Event Handling, Validasi Input, dan Navigasi CardLayout
+Mata Kuliah: IF21W0508 – Praktikum Pemrograman II  
+Nama Mahasiswa: Dwi Dzaky Wibowo
+NIM: 243040011  
 
----
+1. Deskripsi Proyek
+Proyek ini merupakan pengembangan lanjutan dari Tugas 1 menjadi aplikasi Pendaftaran Kegiatan Mahasiswa yang Interaktif berbasis Java Swing. Aplikasi ini mengimplementasikan:
+1. Navigasi Multi-Halaman dengan CardLayout: Mengelola 3 halaman utama (Formulir, Ringkasan, dan Bantuan) di dalam satu jendela (`JFrame`) tanpa membuka pop-up atau jendela duplikat.
+2. Event-Driven Architecture: Menerapkan event handling pada aksi tombol:
+   - Simpan / Tampilkan: Memvalidasi seluruh masukan pengguna, menyimpan data ke model `DataPendaftaran`, menampilkan ke halaman Ringkasan, dan memindahkan card aktif.
+   - Reset Form: Mengosongkan form ke kondisi awal dan mereset status perubahan data.
+   - Kembali: Berpindah kembali ke Halaman Formulir “tanpa kehilangan data” yang telah diinput sebelumnya.
+   - Keluar: Menutup aplikasi dengan konfirmasi jika terdapat perubahan yang belum disimpan (dirty state), serta mendukung pembatalan konfirmasi keluar.
+3. Validasi Input Ketat:
+   - Nama Lengkap: Wajib diisi (tidak boleh kosong atau hanya spasi).
+   - Email: Wajib diisi dengan format email yang wajar/valid (`regex`).
+   - Umur: Wajib berupa bilangan bulat dalam rentang 15 sampai 100 tahun.
+   - Pilihan Kegiatan: Wajib memilih opsi kegiatan yang valid (bukan opsi default).
+   - Jika terdapat input yang salah, proses penyimpanan dibatalkan (tidak diproses), sistem menampilkan dialog pesan kesalahan yang spesifik, dan kontrol yang salah otomatis mendapatkan fokus kursor (`requestFocus()`).
+4. Pencegahan Kehilangan Data (Unsaved Changes Confirmation):
+   - Aplikasi secara otomatis mendeteksi perubahan data input (dirty checking).
+   - Jika pengguna menekan tombol "Keluar" atau tombol silang jendela (X) saat ada data yang belum disimpan, sistem akan menampilkan dialog konfirmasi peringatan. Pengguna dapat memilih `Tidak` untuk membatalkan keluar.
+2. Struktur Halaman & Komponen (CardLayout)
 
-## 1. Deskripsi Proyek
-Aplikasi ini adalah **Formulir Pendaftaran Kegiatan Mahasiswa** berbasis desktop yang dibangun menggunakan pustaka **Java Swing**. Aplikasi dirancang dengan antarmuka yang rapi, modular, dan responsif terhadap perubahan ukuran jendela (*window resizing*).
+Nama Card | Komponen Kelas | Deskripsi 
+`CARD_FORM` | `PanelFormulir.java` | Menampung formulir pendaftaran lengkap (Identitas, Kegiatan, Catatan, Persetujuan) dan tombol aksi (Bantuan, Reset, Keluar, Simpan/Tampilkan). |
+`CARD_RINGKASAN` | `PanelRingkasan.java` | Menampilkan ringkasan lengkap data yang telah disimpan (Identitas, Kegiatan, Catatan, Timestamp), dilengkapi tombol Kembali dan Keluar. |
+`CARD_BANTUAN` | `PanelBantuan.java` | Menampilkan petunjuk pengisian, daftar aturan validasi, dan penjelasan fungsi setiap tombol aplikasi. |
 
-### Komponen Swing yang Digunakan:
-1. `JFrame`: Window utama aplikasi dengan penanganan `setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)`.
-2. `JPanel`: Panel pembagi area dan pengelompokan (*grouping*).
-3. `JLabel`: Menampilkan teks judul header, label input field, dan keterangan.
-4. `JTextField`: Input teks satu baris untuk *Nama Lengkap* dan *NIM*.
-5. `JComboBox`: Dropdown menu untuk memilih *Program Studi* dan *Jenis Kegiatan*.
-6. `JRadioButton` & `ButtonGroup`: Pilihan opsi eksklusif untuk *Jenis Kelamin* (Laki-laki / Perempuan) dan *Sesi Waktu* (Pagi / Siang).
-7. `JCheckBox`: Pilihan jamak (opsional) untuk *Fasilitas Tambahan* (Sertifikat, Konsumsi, Modul) dan *Persetujuan Ketentuan*.
-8. `JTextArea` & `JScrollPane`: Input teks multi-baris untuk *Catatan Tambahan / Alasan* yang dilengkapi fitur scrollbar dan word-wrap.
-9. `JButton`: Tombol aksi interaktif (*Daftar Sekarang*, *Reset Form*, dan *Keluar*).
 
-### Layout Manager yang Digunakan (Tanpa Absolute Positioning / Null Layout):
-1. **`BorderLayout`**:
-   - Layout utama pada `JFrame` ContentPane.
-   - `NORTH`: Panel Header / Judul Aplikasi.
-   - `CENTER`: Panel formulir yang dibungkus `JScrollPane` agar konten tetap dapat diakses saat jendela berukuran kecil.
-   - `SOUTH`: Panel tombol navigasi dan aksi.
-2. **`GridBagLayout`**:
-   - Digunakan pada setiap panel kelompok (*Identitas*, *Pilihan Kegiatan*, dan *Catatan*).
-   - Memastikan label dan input tersusun presisi, rata kiri-kanan, dan fleksibel mengikuti pelebaran jendela (`weightx`, `fill = HORIZONTAL`).
-3. **`FlowLayout`**:
-   - Menata tombol aksi di bagian bawah secara horizontal dan rapi ke sisi kanan (`FlowLayout.RIGHT`).
-   - Menata sub-komponen radio button dan checkbox.
-4. **`BoxLayout` (Y_AXIS)**:
-   - Menyusun panel-panel kelompok secara vertikal dari atas ke bawah dengan jarak pemisah (`Box.createRigidArea`).
+3. Lingkungan Pengembangan & Spesifikasi
+- JDK Version: OpenJDK 25 LTS (Kompatibel dengan JDK 11, 17, 21, dan 25)
+- IDE: Visual Studio Code dan Antigravity IDE
+- Sistem Operasi: Windows 10/11 (64-bit)
 
-### Inisialisasi:
-Aplikasi diinisialisasi dan dibuka secara aman melalui thread UI resmi Java Swing yaitu **Event Dispatch Thread (EDT)**:
-```java
-SwingUtilities.invokeLater(new Runnable() {
-    @Override
-    public void run() {
-        new Main().setVisible(true);
-    }
-});
-```
 
----
+4. Langkah Build dan Run
 
-## 2. Lingkungan Pengembangan & Spesifikasi
-- **JDK Version:** OpenJDK 25 LTS (Kompatibel dengan JDK 11, 17, 21, dan 25)
-- **IDE:** Antigravity IDE / Visual Studio Code / Apache NetBeans
-- **Sistem Operasi:** Windows 10/11 (64-bit)
-
----
-
-## 3. Langkah Build dan Run
-
-### A. Melalui Terminal / Command Prompt:
-1. Buka terminal pada folder proyek ini.
-2. Lakukan kompilasi file Java:
+A. Melalui Terminal / Command Prompt:
+1. Buka terminal pada folder proyek ini:
    ```bash
-   javac Main.java
+   cd "d:\praktikum smstr 5\Praktikum Pemograman II"
    ```
-3. Jalankan aplikasi:
+2. Kompilasi seluruh file Java:
+   ```bash
+   javac .java
+   ```
+3. Jalankan aplikasi utama:
    ```bash
    java Main
    ```
 
-### B. Melalui IDE (VS Code / Antigravity IDE):
-1. Buka folder proyek di editor.
-2. Buka file `Main.java`.
-3. Klik tombol **Run Java** (ikon segitiga *Play* di pojok kanan atas) atau tekan `F5` / `Ctrl + F5`.
+B. Menjalankan Pengujian Otomatis (9 Skenario Bagian 2):
+Untuk memverifikasi secara langsung seluruh kriteria pengujian tugas:
+```bash
+java TestSkenarioTugas2
+```
 
-### C. Melalui Apache NetBeans:
-1. Buka project atau buat file `Main.java`.
-2. Klik kanan pada file `Main.java` -> pilih **Run File** (`Shift + F6`).
+C. Menghasilkan Tangkapan Layar Aplikasi:
+```bash
+java GenerateScreenshots
+```
+
+D. Melalui IDE (VS Code / Apache NetBeans):
+1. Buka folder proyek di editor/IDE pilihan.
+2. Buka file `Main.java`.
+3. Klik tombol Run Java atau tekan `F5` / `Ctrl + F5` (atau `Shift + F6` di NetBeans).
 
 ---
 
-## 4. Struktur Direktori Proyek
+5. Struktur Direktori Proyek
 ```text
-T01_243040011/
-├── Main.java                 # Kode sumber utama formulir GUI
-├── README.md                 # Dokumentasi proyek dan panduan run
-├── LAPORAN_RINGKAS.md        # Laporan pengujian dan bukti uji
-└── screenshots/              # Tangkapan layar bukti uji responsivitas
-    ├── tampilan_awal.png
-    ├── tampilan_resize_besar.png
-    └── tampilan_resize_kecil.png
+T02_243040011/
+├── DataPendaftaran.java          # Model data untuk menampung data pendaftaran
+├── Main.java                     # Main class, frame utama & pengatur CardLayout
+├── PanelHeader.java              # Komponen header judul dan subjudul
+├── PanelFormulir.java            # Halaman Formulir (Card 1)
+├── PanelIdentitas.java           # Form identitas (Nama, Email, Umur, NIM, Prodi, Gender)
+├── PanelKegiatan.java            # Form kegiatan (Jenis Kegiatan, Sesi, Fasilitas)
+├── PanelCatatan.java             # Form catatan tambahan dan checkbox persetujuan
+├── PanelTombol.java              # Panel tombol aksi halaman formulir
+├── PanelRingkasan.java           # Halaman Ringkasan data pendaftaran (Card 2 - Modern Ticket Receipt)
+├── PanelBantuan.java             # Halaman Bantuan dan panduan validasi (Card 3)
+├── ModernDialog.java             # Pop-up kustom bertema Glassmorphism UI (Validasi, Konfirmasi, Sukses)
+├── UIStyle.java                  # Konstanta gaya visual, warna ungu, font, dan tombol modern
+├── TombolSimpanListener.java     # Event handler tombol Simpan / Tampilkan & validasi
+├── TombolResetListener.java      # Event handler tombol Reset form
+├── TombolKeluarListener.java     # Event handler tombol Keluar & konfirmasi
+├── TombolDaftarListener.java     # Adapter listener untuk kompatibilitas Tugas 1
+├── TestSkenarioTugas2.java       # Program pengujian otomatis seluruh skenario Bagian 2
+├── GenerateScreenshots.java      # Utilitas penangkap layar aplikasi
+├── README.md                     # Dokumentasi panduan teknis dan build/run
+├── LAPORAN_RINGKAS.md            # Laporan pengujian dan bukti uji 9 skenario
+└── screenshots/                  # Berkas tangkapan layar antarmuka & pop-up
+    ├── 01_halaman_formulir.png
+    ├── 02_halaman_ringkasan.png
+    ├── 03_halaman_bantuan.png
+    ├── 04_popup_validasi_input.png
+    ├── 05_popup_konfirmasi_keluar.png
+    └── 06_popup_pendaftaran_sukses.png
 ```
+
+

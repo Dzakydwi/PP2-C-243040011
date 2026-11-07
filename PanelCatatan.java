@@ -1,70 +1,83 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * Panel Kelompok 3: Catatan Khusus & Persetujuan
- * Menggunakan GridBagLayout yang responsif untuk menampung textarea dan checkbox.
  */
 public class PanelCatatan extends JPanel {
 
     public JTextArea txtCatatan;
     public JCheckBox cbSetuju;
 
-    public PanelCatatan() {
+    public PanelCatatan(Main mainFrame) {
         setLayout(new GridBagLayout());
+        setOpaque(false);
         setBorder(new CompoundBorder(
-                new TitledBorder(BorderFactory.createLineBorder(new Color(189, 195, 199)),
-                        " Catatan Khusus & Persetujuan "),
-                new EmptyBorder(8, 12, 8, 12)
+                new TitledBorder(new LineBorder(UIStyle.BORDER_LIGHT, 1, true),
+                        " 3. Catatan Khusus & Persetujuan ",
+                        TitledBorder.LEFT,
+                        TitledBorder.TOP,
+                        UIStyle.FONT_SECTION,
+                        UIStyle.PURPLE_PRIMARY),
+                new EmptyBorder(12, 16, 14, 16)
         ));
-        // Menetapkan ukuran minimum agar panel tidak pernah gepeng saat jendela diciutkan
-        setMinimumSize(new Dimension(200, 125));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
-        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(6, 8, 3, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Baris 1: Catatan (JTextArea dengan JScrollPane yang responsif)
-        gbc.gridx = 0;
+        // Baris 1: Label Catatan
         gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0.0;
-        add(new JLabel("Catatan / Alasan :"), gbc);
-
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
         gbc.weightx = 1.0;
-        gbc.weighty = 1.0; // Mengembang mengisi area vertikal
+        JLabel lblCat = new JLabel("Catatan Tambahan / Alasan Mengikuti Kegiatan");
+        lblCat.setFont(UIStyle.FONT_LABEL);
+        lblCat.setForeground(UIStyle.TEXT_DARK);
+        add(lblCat, gbc);
 
-        txtCatatan = new JTextArea(4, 25);
+        // Baris 2: TextArea Catatan dengan styling rounded dan padding
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 8, 12, 8);
+        txtCatatan = new JTextArea(3, 20);
+        txtCatatan.setFont(UIStyle.FONT_INPUT);
         txtCatatan.setLineWrap(true);
         txtCatatan.setWrapStyleWord(true);
-        txtCatatan.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtCatatan.setForeground(UIStyle.TEXT_DARK);
+        txtCatatan.setCaretColor(UIStyle.PURPLE_PRIMARY);
 
         JScrollPane scrollCatatan = new JScrollPane(txtCatatan);
-        scrollCatatan.setPreferredSize(new Dimension(200, 85));
-        scrollCatatan.setMinimumSize(new Dimension(150, 75));
+        scrollCatatan.setBorder(new CompoundBorder(
+                new LineBorder(UIStyle.BORDER_LIGHT, 1, true),
+                new EmptyBorder(6, 8, 6, 8)
+        ));
         add(scrollCatatan, gbc);
 
-        // Baris 2: Checkbox Persetujuan (JCheckBox)
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weighty = 0.0;
-
+        // Baris 3: Checkbox Persetujuan dengan custom check icon
+        gbc.gridy = 2;
+        gbc.insets = new Insets(4, 8, 4, 8);
         cbSetuju = new JCheckBox(
-                "Saya menyatakan bahwa data yang diisi adalah benar dan menyetujui ketentuan kegiatan."
+                "Saya menyatakan bahwa data yang diisi adalah benar dan menyetujui ketentuan pendaftaran."
         );
-        cbSetuju.setOpaque(false);
+        UIStyle.styleCheckBox(cbSetuju);
         add(cbSetuju, gbc);
+
+        // Listener perubahan
+        txtCatatan.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { mainFrame.markAsModified(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { mainFrame.markAsModified(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { mainFrame.markAsModified(); }
+        });
+
+        cbSetuju.addItemListener(e -> mainFrame.markAsModified());
     }
 }

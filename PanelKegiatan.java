@@ -1,16 +1,14 @@
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 /**
  * Panel Kelompok 2: Pilihan Kegiatan
- * Menggunakan GridBagLayout untuk penataan pilihan kegiatan, sesi, dan fasilitas.
+ * Penataan modern untuk dropdown kegiatan, opsi sesi waktu dengan radio button custom,
+ * dan fasilitas tambahan dengan custom checkbox.
  */
 public class PanelKegiatan extends JPanel {
 
@@ -22,27 +20,37 @@ public class PanelKegiatan extends JPanel {
     public JCheckBox cbKonsumsi;
     public JCheckBox cbModul;
 
-    public PanelKegiatan() {
+    public PanelKegiatan(Main mainFrame) {
         setLayout(new GridBagLayout());
+        setOpaque(false);
         setBorder(new CompoundBorder(
-                new TitledBorder(BorderFactory.createLineBorder(new Color(189, 195, 199)), " Pilihan Kegiatan "),
-                new EmptyBorder(8, 12, 8, 12)
+                new TitledBorder(new LineBorder(UIStyle.BORDER_LIGHT, 1, true),
+                        " 2. Pilihan Kegiatan ",
+                        TitledBorder.LEFT,
+                        TitledBorder.TOP,
+                        UIStyle.FONT_SECTION,
+                        UIStyle.PURPLE_PRIMARY),
+                new EmptyBorder(12, 16, 14, 16)
         ));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 6, 4, 6);
+        gbc.insets = new Insets(6, 8, 3, 8);
         gbc.anchor = GridBagConstraints.WEST;
-
-        // Baris 1: Pilihan Kegiatan (JComboBox)
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0.0;
-        add(new JLabel("Jenis Kegiatan :"), gbc);
-
-        gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Baris 1: Label Jenis Kegiatan
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
         gbc.weightx = 1.0;
+        JLabel lblKeg = new JLabel("Pilih Jenis Kegiatan *");
+        lblKeg.setFont(UIStyle.FONT_LABEL);
+        lblKeg.setForeground(UIStyle.TEXT_DARK);
+        add(lblKeg, gbc);
+
+        // Baris 2: ComboBox Kegiatan
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 8, 12, 8);
         String[] daftarKegiatan = {
                 "-- Pilih Kegiatan --",
                 "Seminar Nasional: Tren AI & Machine Learning 2026",
@@ -52,61 +60,67 @@ public class PanelKegiatan extends JPanel {
                 "Lomba: Competitive Programming Championship"
         };
         cmbKegiatan = new JComboBox<>(daftarKegiatan);
+        UIStyle.styleComboBox(cmbKegiatan);
         add(cmbKegiatan, gbc);
 
-        // Baris 2: Sesi Kehadiran (JRadioButton + ButtonGroup)
+        // Baris 3: Label Sesi & Label Fasilitas
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(6, 8, 4, 8);
         gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.NORTHWEST; // Label rata atas
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0.0;
-        add(new JLabel("Sesi Waktu :"), gbc);
+        gbc.weightx = 0.5;
+        JLabel lblSesi = new JLabel("Pilih Sesi Waktu");
+        lblSesi.setFont(UIStyle.FONT_LABEL);
+        lblSesi.setForeground(UIStyle.TEXT_DARK);
+        add(lblSesi, gbc);
 
         gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+        gbc.weightx = 0.5;
+        JLabel lblFas = new JLabel("Fasilitas Tambahan");
+        lblFas.setFont(UIStyle.FONT_LABEL);
+        lblFas.setForeground(UIStyle.TEXT_DARK);
+        add(lblFas, gbc);
 
+        // Baris 4: Panel Sesi (Custom Radio) & Panel Fasilitas (Custom Checkbox)
+        gbc.gridy = 3;
+        gbc.insets = new Insets(0, 8, 6, 8);
+        gbc.gridx = 0;
         rbPagi = new JRadioButton("Pagi (08:30 - 12:00 WIB)");
         rbSiang = new JRadioButton("Siang (13:00 - 16:30 WIB)");
-        rbPagi.setOpaque(false);
-        rbSiang.setOpaque(false);
+        UIStyle.styleRadioButton(rbPagi);
+        UIStyle.styleRadioButton(rbSiang);
 
         bgSesi = new ButtonGroup();
         bgSesi.add(rbPagi);
         bgSesi.add(rbSiang);
 
-        // Disusun vertikal menggunakan GridLayout agar kedua sesi selalu tampil lengkap dan tidak pernah terpotong saat resize
-        JPanel panelSesi = new JPanel(new GridLayout(0, 1, 0, 2));
+        JPanel panelSesi = new JPanel(new GridLayout(0, 1, 0, 8));
         panelSesi.setOpaque(false);
         panelSesi.add(rbPagi);
         panelSesi.add(rbSiang);
         add(panelSesi, gbc);
 
-        // Baris 3: Fasilitas Tambahan (JCheckBox)
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.NORTHWEST; // Label rata atas
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.weightx = 0.0;
-        add(new JLabel("Fasilitas Tambahan :"), gbc);
-
         gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-
         cbSertifikat = new JCheckBox("Sertifikat Cetak");
         cbKonsumsi = new JCheckBox("Makan Siang / Konsumsi");
         cbModul = new JCheckBox("Modul Materi & Rekaman");
-        cbSertifikat.setOpaque(false);
-        cbKonsumsi.setOpaque(false);
-        cbModul.setOpaque(false);
+        UIStyle.styleCheckBox(cbSertifikat);
+        UIStyle.styleCheckBox(cbKonsumsi);
+        UIStyle.styleCheckBox(cbModul);
 
-        // Disusun vertikal menggunakan GridLayout agar seluruh opsi fasilitas (3 opsi) selalu tampil lengkap saat di-resize
-        JPanel panelFasilitas = new JPanel(new GridLayout(0, 1, 0, 2));
+        JPanel panelFasilitas = new JPanel(new GridLayout(0, 1, 0, 8));
         panelFasilitas.setOpaque(false);
         panelFasilitas.add(cbSertifikat);
         panelFasilitas.add(cbKonsumsi);
         panelFasilitas.add(cbModul);
         add(panelFasilitas, gbc);
+
+        // Listener perubahan
+        cmbKegiatan.addItemListener(e -> mainFrame.markAsModified());
+        rbPagi.addItemListener(e -> mainFrame.markAsModified());
+        rbSiang.addItemListener(e -> mainFrame.markAsModified());
+        cbSertifikat.addItemListener(e -> mainFrame.markAsModified());
+        cbKonsumsi.addItemListener(e -> mainFrame.markAsModified());
+        cbModul.addItemListener(e -> mainFrame.markAsModified());
     }
 }
